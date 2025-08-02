@@ -1,4 +1,4 @@
-package com.reliaquest.api.models;
+package com.reliaquest.api.configs;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

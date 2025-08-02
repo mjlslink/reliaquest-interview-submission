@@ -2,8 +2,10 @@ package com.reliaquest.api.controller;
 
 import com.reliaquest.api.models.Employee;
 import com.reliaquest.api.models.EmployeeData;
-import com.reliaquest.api.models.EmployeeResponse;
 import com.reliaquest.api.service.EmployeeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,44 +26,100 @@ public class EmployeeController implements IEmployeeController<Employee, Employe
     }
 
     @Override
+    @Operation(summary = "Fetches all employees")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Successful"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+                @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+                @ApiResponse(responseCode = "404", description = "Employee not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     public ResponseEntity<List<Employee>> getAllEmployees() {
-
-        log.info("Fetching all employees");
-        EmployeeResponse allEmployees = employeeService.getAllEmployees();
         return ResponseEntity.of(
                 Optional.ofNullable(employeeService.getAllEmployees().getData()));
     }
 
     @Override
+    @Operation(summary = "Fetches employees with the specified name search string")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Found the employee"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+                @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+                @ApiResponse(responseCode = "404", description = "Employee not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     public ResponseEntity<List<Employee>> getEmployeesByNameSearch(@PathVariable String searchString) {
-        log.info("Found search string: {}", searchString);
         return ResponseEntity.of(Optional.ofNullable(employeeService.getEmployeesByName(searchString)));
     }
 
     @Override
+    @Operation(summary = "Fetches employees by UUID")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Found the employee"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+                @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+                @ApiResponse(responseCode = "404", description = "Employee not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     public ResponseEntity<Employee> getEmployeeById(@PathVariable String id) {
-        log.info("Fetching employee with ID: {}", id);
         return ResponseEntity.of(Optional.ofNullable(employeeService.getEmployeeById(id)));
     }
 
     @Override
+    @Operation(summary = "Fetches employees with the highest salary")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Found the employee"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+                @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+                @ApiResponse(responseCode = "404", description = "Employee not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     public ResponseEntity<Integer> getHighestSalaryOfEmployees() {
         return ResponseEntity.of(Optional.ofNullable(employeeService.getHighestSalaryOfEmployees()));
     }
 
     @Override
+    @Operation(summary = "Fetches top 10 highest-paid employees ")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Found the employee"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+                @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+                @ApiResponse(responseCode = "404", description = "Employee not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     public ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames() {
         return ResponseEntity.of(Optional.ofNullable(employeeService.getHighestEarningEmployeeNames()));
     }
 
     @Override
+    @Operation(summary = "Creates an employees ")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Employee created successfully"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+                @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+                @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     public ResponseEntity<Employee> createEmployee(EmployeeData employeeInput) {
         return ResponseEntity.of(Optional.ofNullable(employeeService.createEmployee(employeeInput)));
     }
 
     @Override
-    @DeleteMapping
+    @Operation(summary = "deletes an employee by UUID ")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Employee deleted successfully"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+                @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+                @ApiResponse(responseCode = "404", description = "Employee not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error"),
+            })
     public ResponseEntity<String> deleteEmployeeById(String id) {
-        return null;
+        return ResponseEntity.of(Optional.ofNullable(employeeService.deleteEmployeeById(id)));
     }
 }

@@ -1,29 +1,33 @@
 package com.reliaquest.api.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Builder(toBuilder = true)
+@JsonNaming(Employee.PrefixNamingStrategy.class)
 public class Employee {
     private UUID id;
-
-    @JsonProperty("employee_name")
     private String name;
-
-    @JsonProperty("employee_salary")
     private Integer salary;
-
-    @JsonProperty("employee_age")
     private Integer age;
-
-    @JsonProperty("employee_title")
     private String title;
-
-    @JsonProperty("employee_email")
     private String email;
+
+    static class PrefixNamingStrategy extends PropertyNamingStrategies.NamingBase {
+        @Override
+        public String translate(String propertyName) {
+            if ("id".equals(propertyName)) {
+                return propertyName;
+            }
+            return "employee_" + propertyName;
+        }
+    }
 }
 
 // TODO: maybe make this a record
