@@ -3,6 +3,7 @@ package com.reliaquest.api;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.reliaquest.api.models.Employee;
+import com.reliaquest.api.models.EmployeeData;
 import com.reliaquest.api.service.EmployeeService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ class ApiServiceTest {
         assertThat(allEmployees.size()).isEqualTo(0);
     }
 
-    // @Test
+    @Test
     public void search_employees_id_successful() {
 
         Employee employee = employeeService.getEmployeeById("93d210ee-4a12-4f07-a161-c41eb6b1dd09");
@@ -61,8 +62,9 @@ class ApiServiceTest {
 
         Integer salary = employeeService.getHighestSalaryOfEmployees();
         assertThat(salary).isNotNull();
-        //        assertThat(salary).isEqualTo(495639); //TODO: the salaries change everytime the mock server is
-        // restarted
+
+        // TODO: the salaries change every time the mock server is restarted
+        //        assertThat(salary).isEqualTo(495639);
     }
 
     @Test
@@ -71,4 +73,26 @@ class ApiServiceTest {
         List<String> highestEarningEmployeeNames = employeeService.getHighestEarningEmployeeNames();
         assertThat(highestEarningEmployeeNames).isNotNull();
     }
+
+    @Test
+    public void add_employee_successful() {
+        EmployeeData data = new EmployeeData();
+        data.setName("Test Employee2");
+        data.setAge(33);
+        data.setSalary(50000);
+        data.setTitle("Engineering");
+        data.setEmail("none@nowherte.org");
+        Employee employee = employeeService.createEmployee(data);
+        assertThat(employee).isNotNull();
+        assertThat(employee.getId()).isNotNull();
+    }
+
+    //@Test
+    public void delete_employee_successful() {
+        String id = "ca64b7b1-b125-4d85-a099-b269a7732502"; // Example ID, replace with a valid one
+        String response = employeeService.deleteEmployeeById(id);
+        assertThat(response).isNotNull();
+    }
+
+
 }

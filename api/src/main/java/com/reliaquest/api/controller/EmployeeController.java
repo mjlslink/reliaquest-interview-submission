@@ -105,7 +105,7 @@ public class EmployeeController implements IEmployeeController<Employee, Employe
                 @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
                 @ApiResponse(responseCode = "500", description = "Internal server error"),
             })
-    public ResponseEntity<Employee> createEmployee(EmployeeData employeeInput) {
+    public ResponseEntity<Employee> createEmployee(@RequestBody EmployeeData employeeInput) {
         return ResponseEntity.of(Optional.ofNullable(employeeService.createEmployee(employeeInput)));
     }
 
@@ -119,7 +119,7 @@ public class EmployeeController implements IEmployeeController<Employee, Employe
                 @ApiResponse(responseCode = "404", description = "Employee not found"),
                 @ApiResponse(responseCode = "500", description = "Internal server error"),
             })
-    public ResponseEntity<String> deleteEmployeeById(String id) {
+    public ResponseEntity<String> deleteEmployeeById(@PathVariable String id) {
         return ResponseEntity.of(Optional.ofNullable(employeeService.deleteEmployeeById(id)));
     }
 }
