@@ -41,7 +41,7 @@ public class EmployeeController implements IEmployeeController<Employee, Employe
     }
 
     @Override
-    @Operation(summary = "Fetches employees with the specified name search string")
+    @Operation(summary = "Fetches employees containing the specified name search string")
     @ApiResponses(
             value = {
                 @ApiResponse(responseCode = "200", description = "Found the employee"),

@@ -6,15 +6,22 @@ import com.reliaquest.api.models.EmployeeResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -39,19 +46,24 @@ public class EmployeeService {
 
     @PostConstruct
     public void init() {
-        this.restClient = RestClient.builder()
-                .baseUrl(dataSourceUrl)
-                .build();
+        this.restClient = restClient(dataSourceUrl);
         log.info("Initialized EmployeeService with data source URL: {}", dataSourceUrl);
     }
 
     @Retryable(
-            value = {HttpClientErrorException.class},
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 2000))
+            value = {org.springframework.web.client.HttpClientErrorException.TooManyRequests.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 3000, multiplier = 2))
+    @Cacheable("employees")
+    @CircuitBreaker(name = "employeeService", fallbackMethod = "fallbackGetAllEmployees")
     public EmployeeResponse getAllEmployees() {
         log.info("Fetching all employees from {}", dataSourceUrl);
         return restClient.get().retrieve().body(EmployeeResponse.class);
+    }
+
+    public EmployeeResponse fallbackGetAllEmployees(Throwable ex) {
+        log.error("Rate limit exceeded. Returning fallback response.", ex);
+        return new EmployeeResponse(Collections.emptyList(), "error", "Rate limit exceeded");
     }
 
     public List<Employee> getEmployeesByName(String searchString) {
@@ -71,6 +83,7 @@ public class EmployeeService {
     }
 
     public Integer getHighestSalaryOfEmployees() {
+        log.info("Fetching highest salary from all employees");
         return getAllEmployees().getData().stream()
                 .map(Employee::getSalary)
                 .max(Integer::compareTo)
@@ -78,6 +91,7 @@ public class EmployeeService {
     }
 
     public List<String> getHighestEarningEmployeeNames() {
+        log.info("Fetching names of employees with the highest salary");
         List<Employee> employees = getAllEmployees().getData();
 
         Integer maxSalary =
@@ -96,6 +110,7 @@ public class EmployeeService {
         log.info("Creating employee with input: {}", employeeInput);
         return restClient
                 .post()
+                .uri("/createEmployee")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(employeeInput)
                 .retrieve()
@@ -116,6 +131,26 @@ public class EmployeeService {
                 .body(params)
                 .retrieve()
                 .body(String.class);
+    }
+
+    @Bean
+    public RestClient restClient(@Value("${dataserver.url}") String baseUrl) {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        cm.setMaxTotal(50);
+        cm.setDefaultMaxPerRoute(10);
+
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setConnectionManager(cm)
+                .build();
+
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+
+        log.info("Creating RestClient pool wih {} connections on base URL: {}", 50, baseUrl);
+
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .requestFactory(factory)
+                .build();
     }
 }
 // TODO: use SSL to secure the API endpoints and implement the other methods as per the interface requirements.
