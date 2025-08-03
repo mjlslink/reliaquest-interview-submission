@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -65,16 +67,14 @@ public class EmployeeService {
                 .filter(employee -> Objects.nonNull(employee.getId())
                         && employee.getId().toString().equals(id))
                 .findFirst()
-                .get(); // TODO: handle case where employee is not found
-        //        EmployeeResponse response = restClient.get().uri("/{id}", id).retrieve().body(EmployeeResponse.class);
-        //        return response.getData().get(0);
+                .orElseThrow();
     }
 
     public Integer getHighestSalaryOfEmployees() {
         return getAllEmployees().getData().stream()
                 .map(Employee::getSalary)
                 .max(Integer::compareTo)
-                .orElse(null); // TODO: review this, should it return 0 or null?
+                .orElse(null);
     }
 
     public List<String> getHighestEarningEmployeeNames() {
@@ -92,23 +92,27 @@ public class EmployeeService {
                 .collect(Collectors.toList());
     }
 
-    // TODO: remove modelMapper if not necessary
     public Employee createEmployee(@NonNull EmployeeData employeeInput) {
+        log.info("Creating employee with input: {}", employeeInput);
         return restClient
                 .post()
-                .uri("/createEmployee")
-                // .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .body(employeeInput)
                 .retrieve()
                 .body(Employee.class);
     }
 
-    private Employee toEntity(EmployeeData input) {
-        return modelMapper.map(input, Employee.class);
-    }
-
     public String deleteEmployeeById(String id) {
-        return restClient.delete().uri("/deleteEmployee/{id}", id).retrieve().body(String.class);
+        log.info("Deleting employee with ID: {}", id);
+        Employee employeeById = getEmployeeById(id);
+        Map<String, String> params = Map.of("name", employeeById.getName());
+        return restClient.
+                method(HttpMethod.DELETE)
+                .uri(dataSourceUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(params)
+                .retrieve()
+                .body(String.class);
     }
 }
 // TODO: use SSL to secure the API endpoints and implement the other methods as per the interface requirements.

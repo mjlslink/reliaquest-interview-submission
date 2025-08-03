@@ -29,5 +29,3 @@ public class Employee {
         }
     }
 }
-
-// TODO: maybe make this a record
