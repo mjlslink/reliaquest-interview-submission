@@ -96,6 +96,7 @@ public class EmployeeService {
         log.info("Creating employee with input: {}", employeeInput);
         return restClient
                 .post()
+                .uri("/createEmployee")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(employeeInput)
                 .retrieve()
