@@ -7,6 +7,9 @@ dependencies {
     implementation("io.swagger.core.v3:swagger-core:2.2.35")
     implementation 'org.springframework.retry:spring-retry:2.0.5'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'io.github.resilience4j:resilience4j-spring-boot2:2.0.2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

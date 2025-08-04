@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 
 @Data
 @AllArgsConstructor
@@ -18,6 +19,18 @@ public class Employee {
     private Integer age;
     private String title;
     private String email;
+
+    public static Employee from(@NonNull String email, @NonNull CreateEmployeeInput input) {
+        return Employee.builder()
+                .id(UUID.randomUUID())
+                .email(email)
+                .name(input.getName())
+                .salary(input.getSalary())
+                .age(input.getAge())
+                .title(input.getTitle())
+                .build();
+    }
+
 
     static class PrefixNamingStrategy extends PropertyNamingStrategies.NamingBase {
         @Override
