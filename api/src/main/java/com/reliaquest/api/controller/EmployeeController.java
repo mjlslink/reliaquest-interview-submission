@@ -6,6 +6,7 @@ import com.reliaquest.api.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -105,7 +106,7 @@ public class EmployeeController implements IEmployeeController<Employee, Employe
                 @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
                 @ApiResponse(responseCode = "500", description = "Internal server error"),
             })
-    public ResponseEntity<Employee> createEmployee(@RequestBody EmployeeData employeeInput) {
+    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody EmployeeData employeeInput) {
         return ResponseEntity.of(Optional.ofNullable(employeeService.createEmployee(employeeInput)));
     }
 
@@ -119,7 +120,7 @@ public class EmployeeController implements IEmployeeController<Employee, Employe
                 @ApiResponse(responseCode = "404", description = "Employee not found"),
                 @ApiResponse(responseCode = "500", description = "Internal server error"),
             })
-    public ResponseEntity<String> deleteEmployeeById(@PathVariable String id) {
+    public ResponseEntity<String> deleteEmployeeById(@Valid @PathVariable String id) {
         return ResponseEntity.of(Optional.ofNullable(employeeService.deleteEmployeeById(id)));
     }
 }
